@@ -538,11 +538,13 @@ class MatMulOp(Op):
         """Return the matrix multiplication result of input values."""
         assert len(input_values) == 2
         """TODO: your code here"""
+        return torch.matmul(input_values[0], input_values[1])
 
 
     def gradient(self, node: Node, output_grad: Node) -> List[Node]:
         """Given gradient of matmul node, return partial adjoint to each input."""
         """TODO: your code here"""
+        return [torch.matmul(output_grad, Node.inputs[1]), torch.matmul(output_grad, Node.inputs[0])]
 
 
 class SoftmaxOp(Op):
@@ -575,7 +577,7 @@ class SoftmaxOp(Op):
         """TODO: your code here"""
         #output grad @ (diag(compute) - compute @ compute^T)
         #epic game time
-        softmax = self.compute(Node, node.attrs["inputs"][0])
+        softmax = self.compute(Node, Node.attrs["inputs"][0])
         J = torch.diag(softmax) - (torch.outer(softmax, softmax))
         gJ = torch.matmul(output_grad, J)
         return [gJ]
