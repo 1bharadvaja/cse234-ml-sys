@@ -574,6 +574,7 @@ class SoftmaxOp(Op):
         """Given gradient of softmax node, return partial adjoint to input."""
         """TODO: your code here"""
         #output grad @ (diag(compute) - compute @ compute^T)
+        #epic game time
         softmax = self.compute(Node, node.attrs["inputs"][0])
         J = torch.diag(softmax) - (torch.outer(softmax, softmax))
         gJ = torch.matmul(output_grad, J)
