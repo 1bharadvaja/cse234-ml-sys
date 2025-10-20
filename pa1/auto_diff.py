@@ -454,11 +454,14 @@ class DivOp(Op):
         """Return the element-wise division of input values."""
         assert len(input_values) == 2
         """TODO: your code here"""
+        assert (input_values[1] != 0)
+        return input_values[0]/input_values[1]
     
 
     def gradient(self, node: Node, output_grad: Node) -> List[Node]:
         """Given gradient of division node, return partial adjoint to each input."""
         """TODO: your code here"""
+        return [output_grad/node.inputs[1], output_grad*(node.inputs[0])*(-1)/(node.inputs[1]**2)]
 
 class DivByConstOp(Op):
     """Op to element-wise divide a nodes by a constant."""
@@ -500,6 +503,7 @@ class TransposeOp(Op):
         assert len(input_values) == 1
         """TODO: your code here"""
 
+
     def gradient(self, node: Node, output_grad: Node) -> List[Node]:
         """Given gradient of transpose node, return partial adjoint to input."""
         """TODO: your code here"""
@@ -535,6 +539,7 @@ class MatMulOp(Op):
         assert len(input_values) == 2
         """TODO: your code here"""
 
+
     def gradient(self, node: Node, output_grad: Node) -> List[Node]:
         """Given gradient of matmul node, return partial adjoint to each input."""
         """TODO: your code here"""
@@ -555,10 +560,25 @@ class SoftmaxOp(Op):
         """Return softmax of input along specified dimension."""
         assert len(input_values) == 1
         """TODO: your code here"""
+        #m = max(input_values[1][node.dim])
+        m = input_values[0].max(dim=node.attrs["dim"])
+        offset = [input_values[0][i] - m for i in range len(input_values[0])]
+        #s = sum([exp(input_values[0][node.dim][i]-m) for i in range len(input_values[0][node.dim])])
+        exp_x = torch.exp(torch.tensor(offset))
+        s = exp_x.sum(dim=node.attrs["dim"])
+        y = exp_x / s
+        return y
+
 
     def gradient(self, node: Node, output_grad: Node) -> List[Node]:
         """Given gradient of softmax node, return partial adjoint to input."""
         """TODO: your code here"""
+        #output grad @ (diag(compute) - compute @ compute^T)
+        softmax = self.compute(Node, node.attrs["inputs"][0])
+        J = torch.diag(softmax) - (torch.outer(softmax, softmax))
+        gJ = torch.matmul(output_grad, J)
+        return [gJ]
+
 
 
 class LayerNormOp(Op):
