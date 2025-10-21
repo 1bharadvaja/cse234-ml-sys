@@ -733,14 +733,17 @@ def topological_sort(nodes):
         Nodes in topological order
     """
     """TODO: your code here"""
+    nod = {n: 0 for n in nodes}
     topsort = []
 
     def dfs(node):
         for n in node.inputs:
-
-
-
-
+            if nod[n] == 1:
+                return
+            dfs(n)
+            nod[n] = 1
+            topsort.insert(0, n)
+    return topsort
 
 
 class Evaluator:
@@ -778,6 +781,7 @@ class Evaluator:
         """TODO: your code here"""
 
 
+
 def gradients(output_node: Node, nodes: List[Node]) -> List[Node]:
     """Construct the backward computational graph, which takes gradient
     of given output node with respect to each node in input list.
@@ -797,3 +801,4 @@ def gradients(output_node: Node, nodes: List[Node]) -> List[Node]:
         A list of gradient nodes, one for each input nodes respectively.
     """
     """TODO: your code here"""
+
