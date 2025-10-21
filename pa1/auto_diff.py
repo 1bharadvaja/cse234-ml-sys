@@ -564,7 +564,7 @@ class SoftmaxOp(Op):
         """TODO: your code here"""
         #m = max(input_values[1][node.dim])
         m = input_values[0].max(dim=node.attrs["dim"])
-        offset = [input_values[0][i] - m for i in range len(input_values[0])]
+        offset = [input_values[0][i] - m for i in range(len(input_values[0]))]
         #s = sum([exp(input_values[0][node.dim][i]-m) for i in range len(input_values[0][node.dim])])
         exp_x = torch.exp(torch.tensor(offset))
         s = exp_x.sum(dim=node.attrs["dim"])
@@ -577,7 +577,7 @@ class SoftmaxOp(Op):
         """TODO: your code here"""
         #output grad @ (diag(compute) - compute @ compute^T)
         #epic game time
-        softmax = self.compute(Node, Node.attrs["inputs"][0])
+        softmax = self.compute(node, node.inputs[0])
         J = torch.diag(softmax) - (torch.outer(softmax, softmax))
         gJ = torch.matmul(output_grad, J)
         return [gJ]
@@ -657,9 +657,12 @@ class PowerOp(Op):
     def compute(self, node: Node, input_values: List[torch.Tensor]) -> torch.Tensor:
         assert len(input_values) == 1
         """TODO: your code here"""
+        return torch.pow(input_values[0], node.attrs["exponent"])
 
     def gradient(self, node: Node, output_grad: Node) -> List[Node]:
         """TODO: your code here"""
+        return [outputs_grad * node.attrs["exponent"] * torch.pow(input_values[0], node.attrs["exponent"] - 1.00) ]
+
 
 class MeanOp(Op):
     """Op to compute mean along specified dimensions.
@@ -675,10 +678,19 @@ class MeanOp(Op):
 
     def compute(self, node: Node, input_values: List[torch.Tensor]) -> torch.Tensor:
         assert len(input_values) == 1
-        """TODO: your code here"""
+        return torch.mean(input_values[0], node.attrs["dim"], keepdim = node.attrs["keepdim"])
 
     def gradient(self, node: Node, output_grad: Node) -> List[Node]:
         """TODO: your code here"""
+        kd = node.attrs["keepdim"]
+        dim = node.attrs["dim"]
+        if kd:
+            return [output_grad*1/((node.inputs[0]).size(dim))]
+        else:
+            #reshape_grad = expand_as_3d(output_grad, node.inputs[0])
+            #return [reshape_grad]
+            reshape_grad = expand_as_3d(output_grad, node.inputs[0])
+            return [reshape_grad * 1/((node.inputs[0]).size(dim))]
 
 # Create global instances of ops.
 # Your implementation should just use these instances, rather than creating new instances.
@@ -721,6 +733,15 @@ def topological_sort(nodes):
         Nodes in topological order
     """
     """TODO: your code here"""
+    topsort = []
+
+    def dfs(node):
+        for n in node.inputs:
+
+
+
+
+
 
 class Evaluator:
     """The node evaluator that computes the values of nodes in a computational graph."""
