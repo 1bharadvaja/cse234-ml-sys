@@ -736,6 +736,9 @@ def topological_sort(nodes):
     nod = {n: 0 for n in nodes}
     topsort = []
 
+    for n in nodes:
+        dfs(n)
+
     def dfs(node):
         for n in node.inputs:
             if nod[n] == 1:
@@ -779,6 +782,25 @@ class Evaluator:
             The list of values for nodes in `eval_nodes` field.
         """
         """TODO: your code here"""
+
+        nodes = {}
+        
+
+        def recurse(node):
+            if nodes[node] != null:
+                return
+            inputs = node.inputs
+            op = node.op
+            for inp in inputs:
+                if inp in input_values:
+                    continue
+                else:
+                    recurse(inp)
+                if inp not in input_values:
+                    raise ValueError("not given input value in dict")
+            op.compute(node, [input_values[n] for n in inputs])
+
+
 
 
 
