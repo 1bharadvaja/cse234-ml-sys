@@ -785,7 +785,6 @@ class Evaluator:
 
         nodes = {}
         
-
         def recurse(node):
             if nodes[node] != null:
                 return
@@ -796,10 +795,10 @@ class Evaluator:
                     continue
                 else:
                     recurse(inp)
-                if inp not in input_values:
+                if inp not in nodes:
                     raise ValueError("not given input value in dict")
-            op.compute(node, [input_values[n] for n in inputs])
-
+            nodes[node] = op.compute(node, [input_values[n] for n in inputs])
+        return [nodes[n] for n in input_values]
 
 
 
@@ -823,4 +822,26 @@ def gradients(output_node: Node, nodes: List[Node]) -> List[Node]:
         A list of gradient nodes, one for each input nodes respectively.
     """
     """TODO: your code here"""
+    #start at output node
+    #look at each input to output node
+    node_to_grad = {output_node: [1]}
+    for i in topological_sort(nodes):
+        op = i.op
+        v_bar_i = Variable(name = v_bar_i, inputs = node_to_grad[i])
+        v_bar_i_val = sum(node_to_grad[i])
+        
+        grads = v_bar_i_val * op.compute(i, v_bar_i)
+        for v in grads:
+            node_to_grad[k].append(v)
+    node_list = []
+    for n in node_to_grad:
+        node_list.append(n)
+    
+    return node_list
+
+
+    
+
+
+
 
